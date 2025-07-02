@@ -8,6 +8,7 @@ class HotelUser(User):
     is_verified = models.BooleanField(default = False)
 
 
+
 class HotelVendor(User):
     phone_number =  models.CharField(unique = True, max_length= 100)
     profile_picture = models.ImageField(upload_to="profile")
