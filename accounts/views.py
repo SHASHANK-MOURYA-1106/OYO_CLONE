@@ -4,8 +4,10 @@ from django.contrib import messages
 import random
 from accounts.models import *
 from django.db.models import Q
-from accounts.utils import generateRandomToken, sendEmailToken, sendOTPtoEmail
+from accounts.utils import generateRandomToken, sendEmailToken, sendOTPtoEmail, sendEmailVendorToken
 from django.contrib.auth import authenticate, login
+from django.contrib.auth.decorators import login_required
+from accounts.utils import generateSlug
 # Create your views here.
 
 def login_page(request):    
@@ -152,7 +154,7 @@ def register_vendor(request):
         password = request.POST.get('password')
         phone_number = request.POST.get('phone_number')
 
-        hotel_user = HotelUser.objects.filter(
+        hotel_user = HotelVendor.objects.filter(
             Q(email = email) | Q(phone_number  = phone_number)
         )
 
@@ -172,7 +174,7 @@ def register_vendor(request):
         hotel_user.set_password(password)
         hotel_user.save()
 
-        sendEmailToken(email , hotel_user.email_token)
+        sendEmailVendorToken(email , hotel_user.email_token)
 
         messages.success(request, "An email Sent to your Email")
         return redirect('/accounts/register-vendor/')
@@ -191,3 +193,52 @@ def dashboard(request):
     hotels = Hotel.objects.filter(hotel_owner=request.user)
     context = {'hotels': hotels}
     return render(request, 'vendor/vendor_dashboard.html', context)
+
+# views.py
+@login_required(login_url='login_vendor')
+def add_hotel(request):
+    if request.method == "POST":
+        hotel_name = request.POST.get('hotel_name')
+        hotel_description = request.POST.get('hotel_description')
+        ameneties= request.POST.getlist('ameneties')
+        hotel_price= request.POST.get('hotel_price')
+        hotel_offer_price= request.POST.get('hotel_offer_price')
+        hotel_location= request.POST.get('hotel_location')
+        hotel_slug = generateSlug(hotel_name)
+
+        hotel_vendor = HotelVendor.objects.get(id = request.user.id)
+
+        hotel_obj = Hotel.objects.create(
+            hotel_name = hotel_name,
+            hotel_description = hotel_description,
+            hotel_price = hotel_price,
+            hotel_offer_price = hotel_offer_price,
+            hotel_location = hotel_location,
+            hotel_slug = hotel_slug,
+            hotel_owner = hotel_vendor
+        )
+
+        for ameneti in ameneties:
+            ameneti = Ameneties.objects.get(id = ameneti)
+            hotel_obj.ameneties.add(ameneti)
+            hotel_obj.save()
+
+
+        messages.success(request, "Hotel Created")
+        return redirect('/accounts/add-hotel/')
+
+
+    ameneties = Ameneties.objects.all()
+
+    return render(request, 'vendor/add_hotel.html', context = {'ameneties' : ameneties})
+
+
+def verify_email_vendor_token(request, token):
+    try:
+        hotel_user = HotelVendor.objects.get(email_token=token)
+        hotel_user.is_verified = True
+        hotel_user.save()
+        messages.success(request, "Email verified")
+        return redirect('/accounts/login-vendor/')
+    except HotelUser.DoesNotExist:
+        return HttpResponse("Invalid Token")
