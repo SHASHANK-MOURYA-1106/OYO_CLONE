@@ -20,7 +20,7 @@ from random import choice
 def createHotel():
     for i in range(100):
         hotel_vendor = choice(HotelVendor.objects.all())
-        amenities = list(Ameneties.objects.all())
+        amenities = list(Amenities.objects.all())
         hotel = Hotel.objects.create(
             hotel_name=fake.company(),
             hotel_description=fake.text(),
