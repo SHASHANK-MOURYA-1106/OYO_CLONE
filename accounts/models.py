@@ -16,13 +16,16 @@ class HotelVendor(User):
     otp = models.CharField(max_length = 10 , null = True , blank = True)
     business_name = models.CharField(max_length = 100)
     is_verified = models.BooleanField(default = False)
+    def __str__(self):
+        return self.username
 
 
 
-class Ameneties(models.Model):
-    name = models.CharField(max_length = 1000)
-    icon = models.ImageField(upload_to="hotels")
-    def __str__(self) -> str:
+class Amenities(models.Model):
+    name = models.CharField(max_length=100)
+    icon = models.ImageField(upload_to='amenities')
+
+    def __str__(self):
         return self.name
 
 class Hotel(models.Model):
@@ -30,11 +33,13 @@ class Hotel(models.Model):
     hotel_description = models.TextField()
     hotel_slug = models.SlugField(max_length = 1000 , unique  = True)
     hotel_owner = models.ForeignKey(HotelVendor, on_delete = models.CASCADE , related_name = "hotels")
-    ameneties = models.ManyToManyField(Ameneties)
+    ameneties = models.ManyToManyField(Amenities, related_name = "hotels", blank = True)
     hotel_price = models.FloatField()
     hotel_offer_price = models.FloatField()
     hotel_location = models.TextField()
     is_active = models.BooleanField(default = True)
+    def __str__(self):
+        return self.hotel_name
 
 
 class HotelImages(models.Model):
@@ -45,3 +50,14 @@ class HotelManager(models.Model):
     hotel = models.ForeignKey(Hotel, on_delete = models.CASCADE , related_name = "hotel_managers")
     manager_name = models.CharField(max_length = 100)
     manager_contact = models.CharField(max_length = 100)
+
+
+#home/ models.py
+
+# other models
+class HotelBooking(models.Model):
+    hotel = models.ForeignKey(Hotel, on_delete = models.CASCADE , related_name="bookings" )
+    booking_user = models.ForeignKey(HotelUser, on_delete = models.CASCADE , )
+    booking_start_date = models.DateField()
+    booking_end_date = models.DateField()
+    price = models.FloatField()

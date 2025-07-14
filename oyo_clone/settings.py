@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/4.2/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -72,13 +72,27 @@ TEMPLATES = [
 WSGI_APPLICATION = 'oyo_clone.wsgi.application'
 
 
+from dotenv import load_dotenv
+import environ
+
+# Load environment variables from .env file
+load_dotenv()
+
+# Initialize Django-environ
+env = environ.Env()
+
+# Read environment variables
+NAME = env.str("NAME")
+USER = env.str("USER")
+
+
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'oyo_clone',       # the name you gave in phpMyAdmin
-        'USER': 'root',
+        'NAME': NAME,       # the name you gave in phpMyAdmin
+        'USER': USER,       # default XAMPP MySQL user
         'PASSWORD': '',               # default XAMPP MySQL has no password for root
         'HOST': 'localhost',
         'PORT': '3306',
@@ -119,8 +133,16 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
+# Static files (CSS, JavaScript, Images)
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static'),
+]
 
-STATIC_URL = 'static/'
+# Media files (User-uploaded files)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,3 +158,4 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = "mouryaladdui1106@gmail.com" 
 EMAIL_HOST_PASSWORD ="gaza sfzx covr gixv"
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
