@@ -72,18 +72,6 @@ TEMPLATES = [
 WSGI_APPLICATION = 'oyo_clone.wsgi.application'
 
 
-from dotenv import load_dotenv
-import environ
-
-# Load environment variables from .env file
-load_dotenv()
-
-# Initialize Django-environ
-env = environ.Env()
-
-# Read environment variables
-NAME = env.str("NAME")
-USER = env.str("USER")
 
 
 # Database
